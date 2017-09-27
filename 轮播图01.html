@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>无标题文档</title>
+    <style type="text/css">
+        * {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            border: 0;
+        }
+
+        .all {
+            width: 500px;
+        .;
+            height: 200px;
+            padding: 7px;
+            border: 1px solid #ccc;
+            margin: 100px auto;
+            position: relative;
+        }
+
+        .screen {
+            width: 500px;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen li {
+            width: 500px;
+            height: 200px;
+            overflow: hidden;
+            float: left;
+        }
+
+        .screen ul {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4000px;
+        }
+
+        .all ol {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            line-height: 20px;
+            text-align: center;
+        }
+
+        .all ol li {
+            float: left;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 1px solid #ccc;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .all ol li.current {
+            background: yellow;
+        }
+
+        #arr {
+            display: none;
+        }
+
+        #arr span {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            margin-top: -20px;
+            background: #000;
+            cursor: pointer;
+            line-height: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-family: '黑体';
+            font-size: 30px;
+            color: #fff;
+            opacity: 0.3;
+            border: 1px solid #fff;
+        }
+
+        #arr #right {
+            right: 5px;
+            left: auto;
+        }
+
+    </style>
+
+    <script>
+
+    </script>
+</head>
+
+<body>
+
+<!--外盒子-->
+<div class="all" id='all'>
+    <!--内盒子-->
+    <div class="screen" id="screen">
+        <ul id="ul">
+            <li><img src="images/1.jpg" width="500" height="200"/></li>
+            <li><img src="images/2.jpg" width="500" height="200"/></li>
+            <li><img src="images/3.jpg" width="500" height="200"/></li>
+            <li><img src="images/4.jpg" width="500" height="200"/></li>
+            <li><img src="images/5.jpg" width="500" height="200"/></li>
+        </ul>
+        <!--小方块-->
+        <ol>
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+            <li>4</li>
+            <li>5</li>
+        </ol>
+        <!--左右小三角-->
+        <div id="arr">
+            <span id="left"><</span>
+            <span id="right">></span>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="myTools.js"></script>
+<script>
+    //鼠标移到screen 按钮显示 ，鼠标移开  按钮隐藏
+    //获取相关元素
+    var oScreen = $('#screen');
+    var oArr = $('#arr');
+    //鼠标移到事件
+    oScreen.onmouseover = function () {
+        oArr.style.display = 'block';
+        clearInterval(timer);
+        timer = null;
+    };
+    //鼠标移出事件
+    oScreen.onmouseout = function () {
+        oArr.style.display = 'none';
+        timer = setInterval(autoPlay,2500);
+    };
+    //点击按钮 图片左右轮播事件
+    //为了实现无缝轮播，复制第一个图片放到最后，复制倒数第二个图片放到第一个前面
+    var oUl = $('#ul');
+    var aLi = $('li', oUl);
+    var oRight = $('#right');
+    var oLeft = $('#left');
+    var aOl = $('ol', oScreen)[0];
+    var navLi = $('li', aOl);
+    //复制第一个图片放到最后
+    var newImg = aLi[0].cloneNode(true);
+    oUl.appendChild(newImg);
+    //复制倒数第二个图片放到第一个前面
+    var newImg2 = aLi[aLi.length - 2].cloneNode(true);
+    oUl.insertBefore(newImg2, aLi[0]);
+    //定义一个全局边量k，作为图片移动的计数器
+    var k = 1;
+    //获取每一个图片的宽
+    var imgW = aLi[0].offsetWidth;
+    //初始化
+    oUl.style.left = -imgW * k + 'px';
+    navLi[0].className = 'current';
+    //点击右按钮，图片向左移动
+    oRight.onclick = function () {
+        k++;
+        //消除点击速度快，定时器累加的bug
+        if(k > aLi.length){
+            k = 1;
+            oUl.style.left = -imgW * k + 'px';
+        }
+        move(oUl, 'left', 20, -imgW * k, function () {
+            if (k >= aLi.length - 1) {
+                k = 1;
+                oUl.style.left = -imgW * k + 'px';
+            }
+            //暴力清除
+            for (var i = 0; i < navLi.length; i++) {
+                navLi[i].className = '';
+            }
+            navLi[k-1].className = 'current';
+        })
+    };
+    //点击左按钮，图片右向移动
+    oLeft.onclick = function () {
+        k--;
+        //消除点击速度快，定时器累加的bug
+        if(k < 0){
+            k = aLi.length - 2;
+            oUl.style.left = -imgW * k + 'px';
+        }
+        move(oUl, 'left', 20, -imgW * k, function () {
+            if (k <= 0) {
+                k = aLi.length - 2;
+                oUl.style.left = -imgW * k + 'px';
+            }
+            //暴力清除
+            for (var i = 0; i < navLi.length; i++) {
+                navLi[i].className = '';
+            }
+            navLi[k-1].className = 'current';
+        })
+    };
+    //鼠标移上，nanv，切换图片
+    for (var i = 0; i < navLi.length; i++) {
+        //存储索引
+        navLi[i].index = i;
+        navLi[i].onmouseover = function () {
+            //暴力清除
+            for (var i = 0; i < navLi.length; i++) {
+                navLi[i].className = '';
+            }
+            navLi[this.index].className = 'current';
+           k= this.index+1;
+            move(oUl, 'left', 40, -imgW * k);
+
+        }
+    };
+    //设置一个定时器，让他自己动
+    var timer = null;
+    timer = setInterval(autoPlay,2500);
+    function autoPlay() {
+        k++;
+        if(k > aLi.length){
+            k = 1;
+            oUl.style.left = -imgW * k + 'px';
+        }
+        move(oUl, 'left', 20, -imgW * k, function () {
+            if (k >= aLi.length - 1) {
+                k = 1;
+                oUl.style.left = -imgW * k + 'px';
+            }
+            //暴力清除
+            for (var i = 0; i < navLi.length; i++) {
+                navLi[i].className = '';
+            }
+            navLi[k - 1].className = 'current';
+        })
+    }
+</script>
+
+</html>
